@@ -24,8 +24,22 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Crear proyecto Capacitor y agregar Android
+      - name: Verificar HTML y crear proyecto Capacitor
         run: |
+          if [ ! -f www/index.html ]; then
+            mkdir -p www
+            if [ -f index.html ]; then
+              cp index.html www/index.html
+            else
+              HTML=$(find . -maxdepth 1 -iname '*.html' | head -n 1)
+              if [ -n "$HTML" ]; then
+                cp "$HTML" www/index.html
+              else
+                echo "ERROR: No se encontró ningún archivo .html en el repositorio."
+                exit 1
+              fi
+            fi
+          fi
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
           node -e 'require("fs").writeFileSync("capacitor.config.json", JSON.stringify({appId:"com.mitienda.app",appName:"Mi tienda",webDir:"www"}, null, 2))'
